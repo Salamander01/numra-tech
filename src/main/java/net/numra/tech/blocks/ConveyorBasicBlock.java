@@ -33,6 +33,15 @@ public class ConveyorBasicBlock extends Block {
         return ActionResult.SUCCESS;
     }
 
+    @Override
+    public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context) {
+        return VoxelShapes.union(
+                Block.createCuboidShape(3,1.5,0,13,3.5,16),
+                Block.createCuboidShape(1, 0, 0, 3, 4, 16),
+                Block.createCuboidShape(13, 0, 0, 15, 4, 16)
+        );
+    }
+
     public ConveyorBasicBlock(Settings settings) {
         super(settings);
         setDefaultState(getStateManager().getDefaultState().with(ACTIVE, false));
