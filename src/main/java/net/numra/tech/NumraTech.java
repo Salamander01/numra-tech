@@ -1,7 +1,7 @@
 package net.numra.tech;
 
 import net.fabricmc.api.ModInitializer;
-import net.numra.tech.blocks.conveyor_basic;
+import net.numra.tech.blocks.ConveyorBasic;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,6 +12,6 @@ public class NumraTech implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		logger_main.info("Hello world!");
-		conveyor_basic.init();
+		ConveyorBasic.init();
 	}
 }
