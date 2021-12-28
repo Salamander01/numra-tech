@@ -23,7 +23,7 @@
     ]
   },
   "mixins": [
-    "numra.mixins.json"
+    
   ],
 
   "depends": {
