@@ -13,7 +13,7 @@ public class ConveyorBasic {
 
     // Wood
     public static final ConveyorBasicBlock CONVEYOR_WOOD = new ConveyorBasicBlock(FabricBlockSettings.of(Material.WOOD).hardness(2.5f).resistance(3.0f));
-    // Remember to add corner block! (without item)
+
 
     public static void init() {
         // Wood
