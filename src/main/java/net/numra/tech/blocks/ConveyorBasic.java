@@ -8,6 +8,8 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
+import static net.numra.tech.items.ItemGroups.NUMRA_CONVEYORS;
+
 public class ConveyorBasic {
     // Defines and registers conveyor_basic blocks and their corresponding items
 
@@ -18,6 +20,6 @@ public class ConveyorBasic {
     public static void init() {
         // Wood
         Registry.register(Registry.BLOCK, new Identifier("numra", "conveyor_wood"), CONVEYOR_WOOD);
-        Registry.register(Registry.ITEM, new Identifier("numra", "conveyor_wood"), new BlockItem(CONVEYOR_WOOD, new FabricItemSettings().group(ItemGroup.REDSTONE))); // Put the item in the redstone category until a mod-specific one is made
+        Registry.register(Registry.ITEM, new Identifier("numra", "conveyor_wood"), new BlockItem(CONVEYOR_WOOD, new FabricItemSettings().group(NUMRA_CONVEYORS))); // Put the item in the redstone category until a mod-specific one is made
     }
 }
