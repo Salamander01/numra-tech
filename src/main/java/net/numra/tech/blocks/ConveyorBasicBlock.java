@@ -22,14 +22,13 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
-import static net.numra.tech.NumraTech.logger_block;
-import static net.numra.tech.blocks.ConveyorBasic.CONVEYOR_WOOD;
-
 @SuppressWarnings("deprecation") // As fabric uses deprecation to indicate you should override and not call in the context of "Block" and those warnings get annoying
 public class ConveyorBasicBlock extends Block {
+    private final double fullVelocity;
+    private final double partVelocity;
+
     public static final BooleanProperty ACTIVE = BooleanProperty.of("on");
     public static final EnumProperty<ConveyorDirection> DIRECTION = EnumProperty.of("direction", ConveyorDirection.class );
-
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> stateManager) {
         stateManager.add(ACTIVE);
@@ -83,7 +82,7 @@ public class ConveyorBasicBlock extends Block {
 
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        if (neighborState.getBlock() == CONVEYOR_WOOD) {
+        if (neighborState.getBlock() instanceof ConveyorBasicBlock) {
             if (testConveyorConnect(state, direction, neighborState)) {
                 return state.with(ACTIVE, neighborState.get(ACTIVE));
             }
@@ -93,12 +92,7 @@ public class ConveyorBasicBlock extends Block {
 
     @Override
     public void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity) { // This function is bad as it seems to check if the entity is in the block or on the top of the block, ignoring the hitbox and just running off of the block taken up by it
-        //Note Item's won't be transferred like this in the end (fancy block entity stuff), and this might even gain an exception to item entities
-        double fullVelocity = 0, partVelocity = 0;
-        switch (state.getBlock().toString().replace("Block{","").replace("}","")) { // Probably a better way to do this with a regex string like "Block{(.*)}" and then passing through group 1, but I don't know how to implement that
-            case "numra:conveyor_wood" -> { fullVelocity = 0.0165; partVelocity = 0.0135; } // Very temporary values, just made fullVelocity match with texture (roughly) and partVelocity work alright
-            default -> logger_block.warn("Unknown ConveyorBlock \"" + state.getBlock().toString().replace("Block{","").replace("}","") + "\" found during ConveyorBlock.onSteppedOn"); //Probably a bad error message, plus it will spam whenever the player so much as breaths while on the block
-        }
+        //Note Items won't be transferred like this in the end (fancy block entity stuff), and this might even gain an exception to item entities
         if (state.get(ACTIVE)) {
             if (!entity.isSneaking()) {
                 switch (state.get(DIRECTION)) {
@@ -125,9 +119,11 @@ public class ConveyorBasicBlock extends Block {
         }
     }
 
-    public ConveyorBasicBlock(Settings settings) {
+    public ConveyorBasicBlock(Settings settings, double fullVelocity, double partVelocity) {
         super(settings);
         setDefaultState(getStateManager().getDefaultState().with(ACTIVE, false).with(DIRECTION, ConveyorDirection.NORTH));
+        this.fullVelocity = fullVelocity;
+        this.partVelocity = partVelocity;
     }
 }
 
