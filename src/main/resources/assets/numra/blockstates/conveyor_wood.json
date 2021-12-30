@@ -1,55 +1,99 @@
 {
   "variants": {
-    "on=false,direction=n": {
+    "on=false,direction=north": {
       "model": "numra:block/conveyor_wood",
       "y": 0
     },
-    "on=false,direction=e": {
+    "on=false,direction=east": {
       "model": "numra:block/conveyor_wood",
       "y": 90
     },
-    "on=false,direction=s": {
+    "on=false,direction=south": {
       "model": "numra:block/conveyor_wood",
       "y": 180
     },
-    "on=false,direction=w": {
+    "on=false,direction=west": {
       "model": "numra:block/conveyor_wood",
       "y": 270
     },
-    "on=true,direction=n": {
+    "on=true,direction=north": {
       "model": "numra:block/conveyor_wood_on",
       "y": 0
     },
-    "on=true,direction=e": {
+    "on=true,direction=east": {
       "model": "numra:block/conveyor_wood_on",
       "y": 90
     },
-    "on=true,direction=s": {
+    "on=true,direction=south": {
       "model": "numra:block/conveyor_wood_on",
       "y": 180
     },
-    "on=true,direction=w": {
+    "on=true,direction=west": {
       "model": "numra:block/conveyor_wood_on",
       "y": 270
     },
-
-
-
-    "on=false,direction=ne": { "model": "numra:block/conveyor_wood" },
-    "on=false,direction=en": { "model": "numra:block/conveyor_wood" },
-    "on=false,direction=se": { "model": "numra:block/conveyor_wood" },
-    "on=false,direction=es": { "model": "numra:block/conveyor_wood" },
-    "on=false,direction=sw": { "model": "numra:block/conveyor_wood" },
-    "on=false,direction=ws": { "model": "numra:block/conveyor_wood" },
-    "on=false,direction=nw": { "model": "numra:block/conveyor_wood" },
-    "on=false,direction=ns": { "model": "numra:block/conveyor_wood" },
-    "on=true,direction=ne": { "model": "numra:block/conveyor_wood" },
-    "on=true,direction=en": { "model": "numra:block/conveyor_wood" },
-    "on=true,direction=se": { "model": "numra:block/conveyor_wood" },
-    "on=true,direction=es": { "model": "numra:block/conveyor_wood" },
-    "on=true,direction=sw": { "model": "numra:block/conveyor_wood" },
-    "on=true,direction=ws": { "model": "numra:block/conveyor_wood" },
-    "on=true,direction=nw": { "model": "numra:block/conveyor_wood" },
-    "on=true,direction=ns": { "model": "numra:block/conveyor_wood" }
+    "on=false,direction=north_east": {
+      "model": "numra:block/conveyor_wood_turn1",
+      "y": 0
+    },
+    "on=false,direction=east_north": {
+      "model": "numra:block/conveyor_wood_turn2",
+      "y": 180
+    },
+    "on=false,direction=south_east": {
+      "model": "numra:block/conveyor_wood_turn2",
+      "y": 270
+    },
+    "on=false,direction=east_south": {
+      "model": "numra:block/conveyor_wood_turn1",
+      "y": 90
+    },
+    "on=false,direction=south_west": {
+      "model": "numra:block/conveyor_wood_turn1",
+      "y": 180
+    },
+    "on=false,direction=west_south": {
+      "model": "numra:block/conveyor_wood_turn2",
+      "y": 0
+    },
+    "on=false,direction=north_west": {
+      "model": "numra:block/conveyor_wood_turn2",
+      "y": 90
+    },
+    "on=false,direction=west_north": {
+      "model": "numra:block/conveyor_wood_turn1",
+      "y": 270
+    },"on=true,direction=north_east": {
+      "model": "numra:block/conveyor_wood_turn1_on",
+      "y": 0
+    },
+    "on=true,direction=east_north": {
+      "model": "numra:block/conveyor_wood_turn2_on",
+      "y": 180
+    },
+    "on=true,direction=south_east": {
+      "model": "numra:block/conveyor_wood_turn2_on",
+      "y": 270
+    },
+    "on=true,direction=east_south": {
+      "model": "numra:block/conveyor_wood_turn1_on",
+      "y": 90
+    },
+    "on=true,direction=south_west": {
+      "model": "numra:block/conveyor_wood_turn1_on",
+      "y": 180
+    },
+    "on=true,direction=west_south": {
+      "model": "numra:block/conveyor_wood_turn2_on",
+      "y": 0
+    },
+    "on=true,direction=north_west": {
+      "model": "numra:block/conveyor_wood_turn2_on",
+      "y": 90
+    },
+    "on=true,direction=west_north": {
+      "model": "numra:block/conveyor_wood_turn1_on",
+      "y": 270
+    }
   }
 }
