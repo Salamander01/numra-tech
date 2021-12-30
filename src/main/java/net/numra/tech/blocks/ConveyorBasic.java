@@ -8,6 +8,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
+import static net.numra.tech.NumraTech.logger_block;
 import static net.numra.tech.items.ItemGroups.NUMRA_CONVEYORS;
 
 public class ConveyorBasic {
@@ -19,6 +20,7 @@ public class ConveyorBasic {
 
     public static void init() {
         // Wood
+        logger_block.debug("initializing CONVEYOR_WOOD");
         Registry.register(Registry.BLOCK, new Identifier("numra", "conveyor_wood"), CONVEYOR_WOOD);
         Registry.register(Registry.ITEM, new Identifier("numra", "conveyor_wood"), new BlockItem(CONVEYOR_WOOD, new FabricItemSettings().group(NUMRA_CONVEYORS)));
     }

@@ -22,8 +22,10 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
+import static net.numra.tech.NumraTech.logger_block;
 import static net.numra.tech.blocks.ConveyorBasic.CONVEYOR_WOOD;
 
+@SuppressWarnings("deprecation") // As fabric uses deprecation to indicate you should override and not call in the context of "Block" and those warnings get annoying
 public class ConveyorBasicBlock extends Block {
     public static final BooleanProperty ACTIVE = BooleanProperty.of("on");
     public static final EnumProperty<ConveyorDirection> DIRECTION = EnumProperty.of("direction", ConveyorDirection.class );
@@ -89,6 +91,39 @@ public class ConveyorBasicBlock extends Block {
         return state;
     }
 
+    @Override
+    public void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity) { // This function is bad as it seems to check if the entity is in the block or on the top of the block, ignoring the hitbox and just running off of the block taken up by it
+        //Note Item's won't be transferred like this in the end (fancy block entity stuff), and this might even gain an exception to item entities
+        double fullVelocity = 0, partVelocity = 0;
+        switch (state.getBlock().toString().replace("Block{","").replace("}","")) { // Probably a better way to do this with a regex string like "Block{(.*)}" and then passing through group 1, but I don't know how to implement that
+            case "numra:conveyor_wood" -> { fullVelocity = 0.0165; partVelocity = 0.0135; } // Very temporary values, just made fullVelocity match with texture (roughly) and partVelocity work alright
+            default -> logger_block.warn("Unknown ConveyorBlock \"" + state.getBlock().toString().replace("Block{","").replace("}","") + "\" found during ConveyorBlock.onSteppedOn"); //Probably a bad error message, plus it will spam whenever the player so much as breaths while on the block
+        }
+        if (state.get(ACTIVE)) {
+            if (!entity.isSneaking()) {
+                switch (state.get(DIRECTION)) {
+                    case NORTH -> entity.addVelocity(0, 0, -fullVelocity);
+                    case EAST -> entity.addVelocity(fullVelocity, 0, 0);
+                    case SOUTH -> entity.addVelocity(0, 0, fullVelocity);
+                    case WEST -> entity.addVelocity(-fullVelocity, 0, 0);
+                    default -> {
+                        switch (state.get(DIRECTION).getFirstDirection()) {
+                            case NORTH -> entity.addVelocity(0, 0, -partVelocity);
+                            case EAST -> entity.addVelocity(partVelocity, 0, 0);
+                            case SOUTH -> entity.addVelocity(0, 0, partVelocity);
+                            case WEST -> entity.addVelocity(-partVelocity, 0, 0);
+                        }
+                        switch (state.get(DIRECTION).getSecondDirection()) {
+                            case NORTH -> entity.addVelocity(0, 0, -fullVelocity);
+                            case EAST -> entity.addVelocity(fullVelocity, 0, 0);
+                            case SOUTH -> entity.addVelocity(0, 0, fullVelocity);
+                            case WEST -> entity.addVelocity(-fullVelocity, 0, 0);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     public ConveyorBasicBlock(Settings settings) {
         super(settings);
