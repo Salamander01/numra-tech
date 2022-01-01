@@ -1,8 +1,10 @@
 package net.numra.tech.blocks;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
@@ -16,19 +18,17 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
-import static net.numra.tech.NumraTech.logger_block;
-
 @SuppressWarnings("deprecation") // As fabric uses deprecation to indicate you should override and not call in the context of "Block" and those warnings get annoying
-public class ConveyorBasicBlock extends Block {
+public class ConveyorBasicBlock extends Block implements BlockEntityProvider {
     private final double fullVelocity;
     private final double partVelocity;
+    private final int inventorySize;
 
     public static final BooleanProperty ACTIVE = BooleanProperty.of("on");
     public static final EnumProperty<ConveyorDirection> DIRECTION = EnumProperty.of("direction", ConveyorDirection.class );
@@ -123,11 +123,22 @@ public class ConveyorBasicBlock extends Block {
             }
         }
     }
-    public ConveyorBasicBlock(Settings settings, double fullVelocity, double partVelocity) {
+
+    @Override
+    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+        return new ConveyorBasicBlockEntity(pos, state);
+    }
+
+    public int getInventorySize() {
+        return this.inventorySize;
+    }
+
+    public ConveyorBasicBlock(Settings settings, double fullVelocity, double partVelocity, int inventorySize) {
         super(settings);
         setDefaultState(getStateManager().getDefaultState().with(ACTIVE, false).with(DIRECTION, ConveyorDirection.NORTH));
         this.fullVelocity = fullVelocity;
         this.partVelocity = partVelocity;
+        this.inventorySize = inventorySize;
     }
 }
 

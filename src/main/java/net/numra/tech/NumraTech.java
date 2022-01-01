@@ -14,7 +14,8 @@ public class NumraTech implements ModInitializer {
 	public void onInitialize() {
 		logger_main.info("Hello from NumraTech!");
 		logger_main.debug("Beginning block init");
-		ConveyorBasic.init();
+		ConveyorBasic.initBlockEntities();
+		ConveyorBasic.initBlocks();
 		logger_main.debug("init finished");
 	}
 }
