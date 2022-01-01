@@ -16,11 +16,14 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+
+import static net.numra.tech.NumraTech.logger_block;
 
 @SuppressWarnings("deprecation") // As fabric uses deprecation to indicate you should override and not call in the context of "Block" and those warnings get annoying
 public class ConveyorBasicBlock extends Block {
@@ -91,34 +94,35 @@ public class ConveyorBasicBlock extends Block {
     }
 
     @Override
-    public void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity) { // This function is bad as it seems to check if the entity is in the block or on the top of the block, ignoring the hitbox and just running off of the block taken up by it
+    public void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity) { // Used over onEntityCollision as the effect will not overlap with onSteppedOn
         //Note Items won't be transferred like this in the end (fancy block entity stuff), and this might even gain an exception to item entities
         if (state.get(ACTIVE)) {
             if (!entity.isSneaking()) {
-                switch (state.get(DIRECTION)) {
-                    case NORTH -> entity.addVelocity(0, 0, -fullVelocity);
-                    case EAST -> entity.addVelocity(fullVelocity, 0, 0);
-                    case SOUTH -> entity.addVelocity(0, 0, fullVelocity);
-                    case WEST -> entity.addVelocity(-fullVelocity, 0, 0);
-                    default -> {
-                        switch (state.get(DIRECTION).getFirstDirection()) {
-                            case NORTH -> entity.addVelocity(0, 0, -partVelocity);
-                            case EAST -> entity.addVelocity(partVelocity, 0, 0);
-                            case SOUTH -> entity.addVelocity(0, 0, partVelocity);
-                            case WEST -> entity.addVelocity(-partVelocity, 0, 0);
-                        }
-                        switch (state.get(DIRECTION).getSecondDirection()) {
-                            case NORTH -> entity.addVelocity(0, 0, -fullVelocity);
-                            case EAST -> entity.addVelocity(fullVelocity, 0, 0);
-                            case SOUTH -> entity.addVelocity(0, 0, fullVelocity);
-                            case WEST -> entity.addVelocity(-fullVelocity, 0, 0);
+                if ((entity.getX() > pos.getX() - 0.05 && entity.getX() < pos.getX() + 1.05) && (entity.getY() > pos.getY() + 0.2 && entity.getY() < pos.getY() + 0.26)) {
+                    switch (state.get(DIRECTION)) {
+                        case NORTH -> entity.addVelocity(0, 0, -fullVelocity);
+                        case EAST -> entity.addVelocity(fullVelocity, 0, 0);
+                        case SOUTH -> entity.addVelocity(0, 0, fullVelocity);
+                        case WEST -> entity.addVelocity(-fullVelocity, 0, 0);
+                        default -> {
+                            switch (state.get(DIRECTION).getFirstDirection()) {
+                                case NORTH -> entity.addVelocity(0, 0, -partVelocity);
+                                case EAST -> entity.addVelocity(partVelocity, 0, 0);
+                                case SOUTH -> entity.addVelocity(0, 0, partVelocity);
+                                case WEST -> entity.addVelocity(-partVelocity, 0, 0);
+                            }
+                            switch (state.get(DIRECTION).getSecondDirection()) {
+                                case NORTH -> entity.addVelocity(0, 0, -fullVelocity);
+                                case EAST -> entity.addVelocity(fullVelocity, 0, 0);
+                                case SOUTH -> entity.addVelocity(0, 0, fullVelocity);
+                                case WEST -> entity.addVelocity(-fullVelocity, 0, 0);
+                            }
                         }
                     }
                 }
             }
         }
     }
-
     public ConveyorBasicBlock(Settings settings, double fullVelocity, double partVelocity) {
         super(settings);
         setDefaultState(getStateManager().getDefaultState().with(ACTIVE, false).with(DIRECTION, ConveyorDirection.NORTH));
