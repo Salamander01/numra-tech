@@ -148,10 +148,10 @@ public class ConveyorBasicBlock extends BlockWithEntity {
             if (state.get(DIRECTION) != newState.get(DIRECTION)) {
                 if (world.getBlockEntity(pos) != null) {
                     ((ConveyorBasicBlockEntity) world.getBlockEntity(pos)).updateSelfState(newState); // IntelliJ creates a warning here even though I check for nulls...
-                } else logger_block.error("Null BlockEntity found during ConveyorBasicBlock.onStateReplaced()");
+                } else logger_block.error("Null BlockEntity found during ConveyorBasicBlock.onStateReplaced");
             }
         }
-        if (state.hasBlockEntity() && !state.isOf(newState.getBlock())) {
+        if (state.hasBlockEntity() && !state.isOf(newState.getBlock())) { // Default code
             world.removeBlockEntity(pos);
         }
     }

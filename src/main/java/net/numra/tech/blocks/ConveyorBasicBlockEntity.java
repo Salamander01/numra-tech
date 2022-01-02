@@ -63,7 +63,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     }
 
     @Override
-    public int getMaxCountPerStack() {
+    public int getMaxCountPerStack() { // Doesn't seem to do anything for some reason
         return slotSize;
     }
 
@@ -107,7 +107,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
         if (dir != null) {
-            return dir == Direction.UP || dir == selfState.get(DIRECTION).getFirstDirection().getOpposite();
+            return (dir == Direction.UP || dir == selfState.get(DIRECTION).getFirstDirection().getOpposite()) && !(stacks.get(slot).getCount() + stack.getCount() > slotSize /* Hacky replacement for getMaxCountPerStack() */);
         } else return false;
     }
 
