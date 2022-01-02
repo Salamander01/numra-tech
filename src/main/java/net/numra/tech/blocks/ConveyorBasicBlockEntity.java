@@ -10,6 +10,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import static net.numra.tech.NumraTech.logger_block;
@@ -20,6 +21,10 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     private final int slotSize;
     private BlockState selfState;
     private final DefaultedList<ItemStack> stacks;
+
+    public static void tick(World world1, BlockPos pos, BlockState state1, ConveyorBasicBlockEntity blockEntity) {
+
+    }
 
     public void updateSelfState(BlockState state) {
         selfState = state;
