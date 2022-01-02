@@ -21,11 +21,27 @@ import static net.numra.tech.blocks.ConveyorBasicBlock.DIRECTION;
 public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInventory {
     private final int inventorySize;
     private final int slotSize;
+    private final int transferSpeed;
+    private int[] progress;
+
     private BlockState selfState;
     private final DefaultedList<ItemStack> stacks;
 
-    public static void tick(World world1, BlockPos pos, BlockState state1, ConveyorBasicBlockEntity blockEntity) {
+    public static void tick(World world, BlockPos pos, BlockState state, ConveyorBasicBlockEntity blockEntity) {
+        for (int i = 0; i < blockEntity.progress.length; ++i) {
+            if (!blockEntity.stacks.get(i).isEmpty()) {
+                blockEntity.progress[i] += blockEntity.transferSpeed;
+                if (blockEntity.progress[i] >= 1000) {
+                    blockEntity.progressItem(i);
+                    blockEntity.progress[i] = 0;
+                }
+                blockEntity.markDirty();
+            } else if (blockEntity.progress[i] != 0) blockEntity.progress[i] = 0; blockEntity.markDirty();
+        }
+    }
 
+    private void progressItem(int itemIndex) {
+        this.removeStack(itemIndex); //temp
     }
 
     public void updateSelfState(BlockState state) {
@@ -95,30 +111,31 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     public void insertDroppedItem(ItemEntity droppedItem) {
         ItemStack newStack = droppedItem.getStack();
         for (int slot : this.getAvailableSlots(Direction.UP)) {
-            if(this.canInsert(slot, newStack, Direction.UP)) {
+            if (this.canInsert(slot, newStack, Direction.UP)) {
                 if (!this.getStack(slot).isEmpty()) {
                     if (this.getStack(slot).isOf(newStack.getItem())) {
                         this.setStack(slot, new ItemStack(newStack.getItem(), this.getStack(slot).getCount() + newStack.getCount()));
-                        droppedItem.remove(Entity.RemovalReason.DISCARDED);
+                        droppedItem.discard();
                         break;
                     }
                 } else {
                     this.setStack(slot, newStack);
-                    droppedItem.remove(Entity.RemovalReason.DISCARDED);
+                    droppedItem.discard();
                     break;
                 }
             }
         }
     }
-
     @Override
     public void writeNbt(NbtCompound tag) {
         Inventories.writeNbt(tag, stacks);
+        tag.putIntArray("progress", progress);
     }
 
     @Override
     public void readNbt(NbtCompound tag) {
         Inventories.readNbt(tag, stacks);
+        progress = tag.getIntArray("progress");
     }
 
     @Override
@@ -148,5 +165,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
         this.slotSize = ((ConveyorBasicBlock)state.getBlock()).getSlotSize();
         this.stacks = DefaultedList.ofSize(size(), ItemStack.EMPTY);
         this.selfState = state;
+        this.transferSpeed = ((ConveyorBasicBlock)state.getBlock()).getTransferSpeed();
+        this.progress = new int[inventorySize];
     }
 }

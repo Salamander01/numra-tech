@@ -8,7 +8,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.EnumProperty;
@@ -33,7 +32,7 @@ public class ConveyorBasicBlock extends BlockWithEntity {
     private final double partVelocity;
     private final int inventorySize;
     private final int slotSize;
-    private final double transferSpeed;
+    private final int transferSpeed;
 
     public static final BooleanProperty ACTIVE = BooleanProperty.of("on");
     public static final EnumProperty<ConveyorDirection> DIRECTION = EnumProperty.of("direction", ConveyorDirection.class );
@@ -150,7 +149,7 @@ public class ConveyorBasicBlock extends BlockWithEntity {
         return this.slotSize;
     }
 
-    public double getTransferSpeed() {
+    public int getTransferSpeed() {
         return this.transferSpeed;
     }
 
@@ -178,7 +177,7 @@ public class ConveyorBasicBlock extends BlockWithEntity {
         return checkType(type, ConveyorBasic.CONVEYOR_BASIC_BLOCK_ENTITY, ConveyorBasicBlockEntity::tick);
     }
 
-    public ConveyorBasicBlock(Settings settings, double fullVelocity, double partVelocity, int inventorySize, int slotSize, double transferSpeed) {
+    public ConveyorBasicBlock(Settings settings, double fullVelocity, double partVelocity, int inventorySize, int slotSize, int transferSpeed) {
         super(settings);
         setDefaultState(getStateManager().getDefaultState().with(ACTIVE, false).with(DIRECTION, ConveyorDirection.NORTH));
         this.fullVelocity = fullVelocity;
