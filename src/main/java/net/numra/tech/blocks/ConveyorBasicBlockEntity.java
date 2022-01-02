@@ -12,9 +12,18 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
+import static net.numra.tech.NumraTech.logger_block;
+import static net.numra.tech.blocks.ConveyorBasicBlock.DIRECTION;
+
 public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInventory {
     private final int inventorySize;
+    private final int slotSize;
+    private BlockState selfState;
     private final DefaultedList<ItemStack> stacks;
+
+    public void updateSelfState(BlockState state) {
+        selfState = state;
+    }
 
     @Override
     public int size() {
@@ -54,6 +63,11 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     }
 
     @Override
+    public int getMaxCountPerStack() {
+        return slotSize;
+    }
+
+    @Override
     public void setStack(int slot, ItemStack stack) { //CREDIT: Adapted from https://fabricmc.net/wiki/tutorial:inventory
         stacks.set(slot, stack);
         if (stack.getCount() > getMaxCountPerStack()) {
@@ -81,12 +95,6 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
         Inventories.readNbt(tag, stacks);
     }
 
-    public ConveyorBasicBlockEntity(BlockPos pos, BlockState state) {
-        super(ConveyorBasic.CONVEYOR_BASIC_BLOCK_ENTITY, pos, state);
-        this.inventorySize = ((ConveyorBasicBlock)state.getBlock()).getInventorySize();
-        this.stacks = DefaultedList.ofSize(size(), ItemStack.EMPTY);
-    }
-
     @Override
     public int[] getAvailableSlots(Direction side) { //CREDIT: Adapted from https://fabricmc.net/wiki/tutorial:inventory
         int[] result = new int[stacks.size()];
@@ -99,20 +107,20 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
         if (dir != null) {
-            return switch (dir) {
-                case UP -> true;
-                // Add true cases dependent on state.get(DIRECTION).getFirstDirection()?
-                default -> false;
-            };
+            return dir == Direction.UP || dir == selfState.get(DIRECTION).getFirstDirection().getOpposite();
         } else return false;
     }
 
     @Override
     public boolean canExtract(int slot, ItemStack stack, Direction dir) {
-        return switch (dir) {
-            case DOWN -> true; // temporary to get the items out during development lol
-            // Add true cases dependent on state.get(DIRECTION).getSecondDirection()?
-            default -> false;
-        };
+        return dir == Direction.DOWN /* Temporary */ || dir == selfState.get(DIRECTION).getSecondDirection();
+    }
+
+    public ConveyorBasicBlockEntity(BlockPos pos, BlockState state) {
+        super(ConveyorBasic.CONVEYOR_BASIC_BLOCK_ENTITY, pos, state);
+        this.inventorySize = ((ConveyorBasicBlock)state.getBlock()).getInventorySize();
+        this.slotSize = ((ConveyorBasicBlock)state.getBlock()).getSlotSize();
+        this.stacks = DefaultedList.ofSize(size(), ItemStack.EMPTY);
+        this.selfState = state;
     }
 }

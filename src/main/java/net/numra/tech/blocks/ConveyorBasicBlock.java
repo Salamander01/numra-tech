@@ -1,9 +1,6 @@
 package net.numra.tech.blocks;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,11 +21,14 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
+import static net.numra.tech.NumraTech.logger_block;
+
 @SuppressWarnings("deprecation") // As fabric uses deprecation to indicate you should override and not call in the context of "Block" and those warnings get annoying
-public class ConveyorBasicBlock extends Block implements BlockEntityProvider {
+public class ConveyorBasicBlock extends BlockWithEntity {
     private final double fullVelocity;
     private final double partVelocity;
     private final int inventorySize;
+    private final int slotSize;
 
     public static final BooleanProperty ACTIVE = BooleanProperty.of("on");
     public static final EnumProperty<ConveyorDirection> DIRECTION = EnumProperty.of("direction", ConveyorDirection.class );
@@ -133,12 +133,36 @@ public class ConveyorBasicBlock extends Block implements BlockEntityProvider {
         return this.inventorySize;
     }
 
-    public ConveyorBasicBlock(Settings settings, double fullVelocity, double partVelocity, int inventorySize) {
+    public int getSlotSize() {
+        return this.slotSize;
+    }
+
+    @Override
+    public BlockRenderType getRenderType(BlockState state) {
+        return BlockRenderType.MODEL;
+    }
+
+    @Override
+    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+        if (state.getBlock() instanceof ConveyorBasicBlock && newState.getBlock() instanceof ConveyorBasicBlock) {
+            if (state.get(DIRECTION) != newState.get(DIRECTION)) {
+                if (world.getBlockEntity(pos) != null) {
+                    ((ConveyorBasicBlockEntity) world.getBlockEntity(pos)).updateSelfState(newState); // IntelliJ creates a warning here even though I check for nulls...
+                } else logger_block.error("Null BlockEntity found during ConveyorBasicBlock.onStateReplaced()");
+            }
+        }
+        if (state.hasBlockEntity() && !state.isOf(newState.getBlock())) {
+            world.removeBlockEntity(pos);
+        }
+    }
+
+    public ConveyorBasicBlock(Settings settings, double fullVelocity, double partVelocity, int inventorySize, int slotSize) {
         super(settings);
         setDefaultState(getStateManager().getDefaultState().with(ACTIVE, false).with(DIRECTION, ConveyorDirection.NORTH));
         this.fullVelocity = fullVelocity;
         this.partVelocity = partVelocity;
         this.inventorySize = inventorySize;
+        this.slotSize = slotSize;
     }
 }
 
