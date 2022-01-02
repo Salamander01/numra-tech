@@ -14,6 +14,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.PositionImpl;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,15 +54,15 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     }
     
     private String progressItem(int itemIndex, World world, BlockPos pos) {
-        BlockPos outPos = getOutPos(pos, false);
-        BlockPos dropPos = getOutPos(pos, true);
+        BlockPos outPos = getOutPos(pos);
+        PositionImpl dropPos = getDropPos(pos);
         Block outBlock = world.getBlockState(outPos).getBlock();
         if (outBlock instanceof ConveyorBasicBlock) {
             if (((ConveyorBasicBlock)selfState.getBlock()).testConveyorConnect(selfState, selfState.get(DIRECTION).getSecondDirection(), world.getBlockState(outPos))) {
                 if (world.getBlockState(outPos) != null) {
                     ConveyorBasicBlockEntity outEntity = (ConveyorBasicBlockEntity) world.getBlockEntity(outPos);
                     ItemStack outStack = stacks.get(itemIndex);
-                    Direction outDir = selfState.get(DIRECTION).getSecondDirection();
+                    Direction outDir = selfState.get(DIRECTION).getSecondDirection().getOpposite(); //Only half understand why this needs to be opposite
                     if (!outEntity.blocked) {
                         if (insertItem(outEntity, outDir, outStack)) {
                             removeStack(itemIndex);
@@ -85,7 +86,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
             markDirty();
             return "Blocked";
         } else if (outBlock instanceof AirBlock || outBlock instanceof FluidBlock) {
-            ItemEntity itemEntity = new ItemEntity(world, dropPos.getX(), dropPos.getY(), dropPos.getZ(), stacks.get(itemIndex));
+            ItemEntity itemEntity = new ItemEntity(world, dropPos.getX(), dropPos.getY(), dropPos.getZ(), stacks.get(itemIndex), 0, 0, 0);
             itemEntity.setPickupDelay(15);
             world.spawnEntity(itemEntity);
             removeStack(itemIndex);
@@ -105,7 +106,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     }
     
     private void checkIfBlocked(World world, BlockPos pos) {
-        BlockPos outPos = getOutPos(pos, false);
+        BlockPos outPos = getOutPos(pos);
         Block outBlock = world.getBlockState(outPos).getBlock();
         if (outBlock instanceof AirBlock || outBlock instanceof FluidBlock || (outBlock instanceof ConveyorBasicBlock && ((ConveyorBasicBlock)selfState.getBlock()).testConveyorConnect(selfState, selfState.get(DIRECTION).getSecondDirection(), world.getBlockState(outPos)) && anyEmptySlots() /* imperfect */)) {
             blocked = false;
@@ -113,22 +114,22 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
         }
     }
     
-    private BlockPos getOutPos(BlockPos pos, boolean specific) {
-        if (!specific) {
-            return switch (selfState.get(DIRECTION).getSecondDirection()) {
-                case NORTH -> pos.north();
-                case EAST -> pos.east();
-                case SOUTH -> pos.south();
-                default -> pos.west(); // Unless someone messes with the enum, up and down will never happen so to appease the IDE we do this.
-            };
-        } else {
-            BlockPos tempPos;
-            switch (selfState.get(DIRECTION).getSecondDirection()) {
-                case NORTH -> { tempPos = pos.north(); return new BlockPos((tempPos.getX() + 0.5), tempPos.getY(), (tempPos.getZ() + 0.2)); }
-                case EAST -> { tempPos = pos.east(); return new BlockPos((tempPos.getX() + 0.2), tempPos.getY(), (tempPos.getZ() + 0.5)); }
-                case SOUTH -> { tempPos = pos.south(); return new BlockPos((tempPos.getX() + 0.5), tempPos.getY(), (tempPos.getZ() + 0.2)); }
-                default -> { tempPos = pos.west(); return new BlockPos((tempPos.getX() + 0.2), tempPos.getY(), (tempPos.getZ() + 0.5)); } // see above comment
-            }
+    private BlockPos getOutPos(BlockPos pos) {
+        return switch (selfState.get(DIRECTION).getSecondDirection()) {
+            case NORTH -> pos.north();
+            case EAST -> pos.east();
+            case SOUTH -> pos.south();
+            default -> pos.west(); // Unless someone messes with the enum, up and down will never happen so to appease the IDE we do this.
+        };
+    }
+    
+    private PositionImpl getDropPos(BlockPos pos) {
+        BlockPos tempPos;
+        switch (selfState.get(DIRECTION).getSecondDirection()) {
+            case NORTH -> { tempPos = pos.north(); return new PositionImpl((tempPos.getX() + 0.5), tempPos.getY(), (tempPos.getZ() + 0.8)); }
+            case EAST -> { tempPos = pos.east(); return new PositionImpl((tempPos.getX() + 0.2), tempPos.getY(), (tempPos.getZ() + 0.5)); }
+            case SOUTH -> { tempPos = pos.south(); return new PositionImpl((tempPos.getX() + 0.5), tempPos.getY(), (tempPos.getZ() + 0.2)); }
+            default -> { tempPos = pos.west(); return new PositionImpl((tempPos.getX() + 0.8), tempPos.getY(), (tempPos.getZ() + 0.5)); } // see above comment
         }
     }
 
@@ -243,7 +244,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
         if (dir != null) {
-            return (dir == Direction.UP || dir == selfState.get(DIRECTION).getFirstDirection()) && !(stacks.get(slot).getCount() + stack.getCount() > slotSize /* Hacky replacement for getMaxCountPerStack() */);
+            return (dir == Direction.UP || dir == selfState.get(DIRECTION).getFirstDirection().getOpposite()) && !(stacks.get(slot).getCount() + stack.getCount() > slotSize /* Hacky replacement for getMaxCountPerStack() */);
         } else return false;
     }
 
