@@ -53,7 +53,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
         }
     }
     
-    private String progressItem(int itemIndex, World world, BlockPos pos) {
+    private String progressItem(int itemIndex, World world, BlockPos pos) { // as of now the only return that does anything is "Blocked"
         BlockPos outPos = getOutPos(pos);
         PositionImpl dropPos = getDropPos(pos);
         Block outBlock = world.getBlockState(outPos).getBlock();
@@ -98,17 +98,10 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
         }
     }
     
-    private boolean anyEmptySlots() {
-        for (ItemStack i : stacks) {
-            if (i.isEmpty()) return true;
-        }
-        return false;
-    }
-    
     private void checkIfBlocked(World world, BlockPos pos) {
         BlockPos outPos = getOutPos(pos);
         Block outBlock = world.getBlockState(outPos).getBlock();
-        if (outBlock instanceof AirBlock || outBlock instanceof FluidBlock || (outBlock instanceof ConveyorBasicBlock && ((ConveyorBasicBlock)selfState.getBlock()).testConveyorConnect(selfState, selfState.get(DIRECTION).getSecondDirection(), world.getBlockState(outPos)) && anyEmptySlots() /* imperfect */)) {
+        if (outBlock instanceof AirBlock || outBlock instanceof FluidBlock || (outBlock instanceof ConveyorBasicBlock && ((ConveyorBasicBlock)selfState.getBlock()).testConveyorConnect(selfState, selfState.get(DIRECTION).getSecondDirection(), world.getBlockState(outPos)))) {
             blocked = false;
             markDirty();
         }
@@ -136,7 +129,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     public void updateSelfState(BlockState state) {
         selfState = state;
     }
-
+    
     @Override
     public int size() {
         return inventorySize;

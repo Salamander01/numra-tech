@@ -8,9 +8,9 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import net.numra.tech.items.ItemGroups;
 
 import static net.numra.tech.NumraTech.logger_block;
-import static net.numra.tech.items.ItemGroups.NUMRA_CONVEYORS;
 
 public class ConveyorBasic {
     // Defines and registers conveyor_basic blocks and their corresponding items
@@ -28,6 +28,6 @@ public class ConveyorBasic {
         // Wood
         logger_block.debug("initializing numra:conveyor_wood");
         Registry.register(Registry.BLOCK, new Identifier("numra:conveyor_wood"), CONVEYOR_WOOD);
-        Registry.register(Registry.ITEM, new Identifier("numra:conveyor_wood"), new BlockItem(CONVEYOR_WOOD, new FabricItemSettings().group(NUMRA_CONVEYORS)));
+        Registry.register(Registry.ITEM, new Identifier("numra:conveyor_wood"), new BlockItem(CONVEYOR_WOOD, new FabricItemSettings().group(ItemGroups.NUMRA_CONVEYORS)));
     }
 }
