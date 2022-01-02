@@ -15,7 +15,7 @@ import static net.numra.tech.items.ItemGroups.NUMRA_CONVEYORS;
 public class ConveyorBasic {
     // Defines and registers conveyor_basic blocks and their corresponding items
 
-    public static final ConveyorBasicBlock CONVEYOR_WOOD = new ConveyorBasicBlock(FabricBlockSettings.of(Material.WOOD).hardness(2.5f).resistance(3.0f), 0.0165, 0.0135, 1, 16);
+    public static final ConveyorBasicBlock CONVEYOR_WOOD = new ConveyorBasicBlock(FabricBlockSettings.of(Material.WOOD).hardness(2.5f).resistance(3.0f), 0.0165, 0.0135, 1, 16, 0.0002);
 
     public static BlockEntityType<ConveyorBasicBlockEntity> CONVEYOR_BASIC_BLOCK_ENTITY;
 

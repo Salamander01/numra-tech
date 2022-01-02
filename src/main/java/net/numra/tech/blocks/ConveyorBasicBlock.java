@@ -5,8 +5,10 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.EnumProperty;
@@ -31,6 +33,7 @@ public class ConveyorBasicBlock extends BlockWithEntity {
     private final double partVelocity;
     private final int inventorySize;
     private final int slotSize;
+    private final double transferSpeed;
 
     public static final BooleanProperty ACTIVE = BooleanProperty.of("on");
     public static final EnumProperty<ConveyorDirection> DIRECTION = EnumProperty.of("direction", ConveyorDirection.class );
@@ -98,30 +101,38 @@ public class ConveyorBasicBlock extends BlockWithEntity {
     @Override
     public void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity) { // Used over onEntityCollision as the effect will not overlap with onSteppedOn
         //Note Items won't be transferred like this in the end (fancy block entity stuff), and this might even gain an exception to item entities
-        if (state.get(ACTIVE)) {
-            if (!entity.isSneaking()) {
-                if ((entity.getX() > pos.getX() - 0.05 && entity.getX() < pos.getX() + 1.05) && (entity.getY() > pos.getY() + 0.2 && entity.getY() < pos.getY() + 0.26)) {
-                    switch (state.get(DIRECTION)) {
-                        case NORTH -> entity.addVelocity(0, 0, -fullVelocity);
-                        case EAST -> entity.addVelocity(fullVelocity, 0, 0);
-                        case SOUTH -> entity.addVelocity(0, 0, fullVelocity);
-                        case WEST -> entity.addVelocity(-fullVelocity, 0, 0);
-                        default -> {
-                            switch (state.get(DIRECTION).getFirstDirection()) {
-                                case NORTH -> entity.addVelocity(0, 0, -partVelocity);
-                                case EAST -> entity.addVelocity(partVelocity, 0, 0);
-                                case SOUTH -> entity.addVelocity(0, 0, partVelocity);
-                                case WEST -> entity.addVelocity(-partVelocity, 0, 0);
-                            }
-                            switch (state.get(DIRECTION).getSecondDirection()) {
-                                case NORTH -> entity.addVelocity(0, 0, -fullVelocity);
-                                case EAST -> entity.addVelocity(fullVelocity, 0, 0);
-                                case SOUTH -> entity.addVelocity(0, 0, fullVelocity);
-                                case WEST -> entity.addVelocity(-fullVelocity, 0, 0);
+        if (!(entity instanceof ItemEntity)) {
+            if (state.get(ACTIVE)) {
+                if (!entity.isSneaking()) {
+                    if ((entity.getX() > pos.getX() - 0.05 && entity.getX() < pos.getX() + 1.05) && (entity.getY() > pos.getY() + 0.2 && entity.getY() < pos.getY() + 0.26)) {
+                        switch (state.get(DIRECTION)) {
+                            case NORTH -> entity.addVelocity(0, 0, -fullVelocity);
+                            case EAST -> entity.addVelocity(fullVelocity, 0, 0);
+                            case SOUTH -> entity.addVelocity(0, 0, fullVelocity);
+                            case WEST -> entity.addVelocity(-fullVelocity, 0, 0);
+                            default -> {
+                                switch (state.get(DIRECTION).getFirstDirection()) {
+                                    case NORTH -> entity.addVelocity(0, 0, -partVelocity);
+                                    case EAST -> entity.addVelocity(partVelocity, 0, 0);
+                                    case SOUTH -> entity.addVelocity(0, 0, partVelocity);
+                                    case WEST -> entity.addVelocity(-partVelocity, 0, 0);
+                                }
+                                switch (state.get(DIRECTION).getSecondDirection()) {
+                                    case NORTH -> entity.addVelocity(0, 0, -fullVelocity);
+                                    case EAST -> entity.addVelocity(fullVelocity, 0, 0);
+                                    case SOUTH -> entity.addVelocity(0, 0, fullVelocity);
+                                    case WEST -> entity.addVelocity(-fullVelocity, 0, 0);
+                                }
                             }
                         }
                     }
                 }
+            }
+        } else {
+            if ((entity.getX() > pos.getX() - 0.05 && entity.getX() < pos.getX() + 1.05) && (entity.getY() > pos.getY() + 0.2 && entity.getY() < pos.getY() + 0.26)) {
+                if (world.getBlockEntity(pos) != null ) {
+                    ((ConveyorBasicBlockEntity) world.getBlockEntity(pos)).insertDroppedItem((ItemEntity) entity);
+                } else logger_block.error("Null BlockEntity found during ConveyorBasicBlock.onSteppedOn");
             }
         }
     }
@@ -139,6 +150,10 @@ public class ConveyorBasicBlock extends BlockWithEntity {
         return this.slotSize;
     }
 
+    public double getTransferSpeed() {
+        return this.transferSpeed;
+    }
+
     @Override
     public BlockRenderType getRenderType(BlockState state) {
         return BlockRenderType.MODEL;
@@ -149,7 +164,7 @@ public class ConveyorBasicBlock extends BlockWithEntity {
         if (state.getBlock() instanceof ConveyorBasicBlock && newState.getBlock() instanceof ConveyorBasicBlock) {
             if (state.get(DIRECTION) != newState.get(DIRECTION)) {
                 if (world.getBlockEntity(pos) != null) {
-                    ((ConveyorBasicBlockEntity) world.getBlockEntity(pos)).updateSelfState(newState); // IntelliJ creates a warning here even though I check for nulls...
+                    ((ConveyorBasicBlockEntity) world.getBlockEntity(pos)).updateSelfState(newState);
                 } else logger_block.error("Null BlockEntity found during ConveyorBasicBlock.onStateReplaced");
             }
         }
@@ -163,13 +178,14 @@ public class ConveyorBasicBlock extends BlockWithEntity {
         return checkType(type, ConveyorBasic.CONVEYOR_BASIC_BLOCK_ENTITY, ConveyorBasicBlockEntity::tick);
     }
 
-    public ConveyorBasicBlock(Settings settings, double fullVelocity, double partVelocity, int inventorySize, int slotSize) {
+    public ConveyorBasicBlock(Settings settings, double fullVelocity, double partVelocity, int inventorySize, int slotSize, double transferSpeed) {
         super(settings);
         setDefaultState(getStateManager().getDefaultState().with(ACTIVE, false).with(DIRECTION, ConveyorDirection.NORTH));
         this.fullVelocity = fullVelocity;
         this.partVelocity = partVelocity;
         this.inventorySize = inventorySize;
         this.slotSize = slotSize;
+        this.transferSpeed = transferSpeed;
     }
 }
 

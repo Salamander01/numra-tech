@@ -2,6 +2,8 @@ package net.numra.tech.blocks;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SidedInventory;
@@ -88,6 +90,25 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     @Override
     public boolean canPlayerUse(PlayerEntity player) {
         return false;
+    }
+
+    public void insertDroppedItem(ItemEntity droppedItem) {
+        ItemStack newStack = droppedItem.getStack();
+        for (int slot : this.getAvailableSlots(Direction.UP)) {
+            if(this.canInsert(slot, newStack, Direction.UP)) {
+                if (!this.getStack(slot).isEmpty()) {
+                    if (this.getStack(slot).isOf(newStack.getItem())) {
+                        this.setStack(slot, new ItemStack(newStack.getItem(), this.getStack(slot).getCount() + newStack.getCount()));
+                        droppedItem.remove(Entity.RemovalReason.DISCARDED);
+                        break;
+                    }
+                } else {
+                    this.setStack(slot, newStack);
+                    droppedItem.remove(Entity.RemovalReason.DISCARDED);
+                    break;
+                }
+            }
+        }
     }
 
     @Override
