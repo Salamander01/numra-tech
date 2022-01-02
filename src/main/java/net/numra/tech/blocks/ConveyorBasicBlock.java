@@ -7,6 +7,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -14,6 +15,7 @@ import net.minecraft.state.property.EnumProperty;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 
+import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
@@ -161,10 +163,15 @@ public class ConveyorBasicBlock extends BlockWithEntity {
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (state.getBlock() instanceof ConveyorBasicBlock && newState.getBlock() instanceof ConveyorBasicBlock) {
-            if (state.get(DIRECTION) != newState.get(DIRECTION)) {
+            if (state.get(DIRECTION) != newState.get(DIRECTION) || state.get(ACTIVE) != newState.get(ACTIVE)) {
                 if (world.getBlockEntity(pos) != null) {
                     ((ConveyorBasicBlockEntity) world.getBlockEntity(pos)).updateSelfState(newState);
                 } else logger_block.error("Null BlockEntity found during ConveyorBasicBlock.onStateReplaced");
+            }
+        } else {
+            BlockEntity blockEntity = world.getBlockEntity(pos);
+            if (blockEntity instanceof Inventory) {
+                ItemScatterer.spawn(world, pos, (Inventory)(blockEntity));
             }
         }
         if (state.hasBlockEntity() && !state.isOf(newState.getBlock())) { // Default code
