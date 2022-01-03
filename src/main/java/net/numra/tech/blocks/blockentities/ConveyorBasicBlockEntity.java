@@ -5,6 +5,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -55,15 +56,15 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
             }
         }
     }
-    
     private String progressItem(int itemIndex, World world, BlockPos pos) { // as of now the only return that does anything is "Blocked"
-        BlockPos outPos = getOutPos(pos);
+        BlockPos outPos = pos.offset(selfState.get(DIRECTION).getSecondDirection());
         PositionImpl dropPos = getDropPos(pos);
         Block outBlock = world.getBlockState(outPos).getBlock();
+        @Nullable BlockEntity tempOutEntity = world.getBlockEntity(outPos);
         if (outBlock instanceof ConveyorBasicBlock) {
             if (((ConveyorBasicBlock)selfState.getBlock()).testConveyorConnect(selfState, selfState.get(DIRECTION).getSecondDirection(), world.getBlockState(outPos))) {
-                if (world.getBlockState(outPos) != null) {
-                    ConveyorBasicBlockEntity outEntity = (ConveyorBasicBlockEntity) world.getBlockEntity(outPos);
+                if (tempOutEntity != null) {
+                    ConveyorBasicBlockEntity outEntity = (ConveyorBasicBlockEntity) tempOutEntity;
                     ItemStack outStack = stacks.get(itemIndex);
                     Direction outDir = selfState.get(DIRECTION).getSecondDirection().getOpposite(); //Only half understand why this needs to be opposite
                     if (!outEntity.blocked) {
@@ -88,6 +89,21 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
             blocked = true;
             markDirty();
             return "Blocked";
+        } else if (tempOutEntity instanceof Inventory) {
+            boolean inserted;
+            if (tempOutEntity instanceof SidedInventory) {
+                inserted = insertItem((SidedInventory) tempOutEntity, selfState.get(DIRECTION).getSecondDirection(), stacks.get(itemIndex));
+            } else {
+                inserted = insertItem((Inventory) tempOutEntity, stacks.get(itemIndex));
+            }
+            if (inserted) {
+                removeStack(itemIndex);
+                return "Transferred";
+            } else {
+                blocked = true;
+                markDirty();
+                return "Blocked";
+            }
         } else if (outBlock instanceof AirBlock || outBlock instanceof FluidBlock || outBlock instanceof BubbleColumnBlock) {
             ItemEntity itemEntity = new ItemEntity(world, dropPos.getX(), dropPos.getY(), dropPos.getZ(), stacks.get(itemIndex), 0, 0, 0);
             itemEntity.setPickupDelay(15);
@@ -102,21 +118,12 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     }
     
     private void checkIfBlocked(World world, BlockPos pos) {
-        BlockPos outPos = getOutPos(pos);
+        BlockPos outPos = pos.offset(selfState.get(DIRECTION).getSecondDirection());
         Block outBlock = world.getBlockState(outPos).getBlock();
         if (outBlock instanceof AirBlock || outBlock instanceof FluidBlock || outBlock instanceof BubbleColumnBlock || (outBlock instanceof ConveyorBasicBlock && ((ConveyorBasicBlock)selfState.getBlock()).testConveyorConnect(selfState, selfState.get(DIRECTION).getSecondDirection(), world.getBlockState(outPos)))) {
             blocked = false;
             markDirty();
         }
-    }
-    
-    private BlockPos getOutPos(BlockPos pos) {
-        return switch (selfState.get(DIRECTION).getSecondDirection()) {
-            case NORTH -> pos.north();
-            case EAST -> pos.east();
-            case SOUTH -> pos.south();
-            default -> pos.west(); // Unless someone messes with the enum, up and down will never happen so to appease the IDE we do this.
-        };
     }
     
     private PositionImpl getDropPos(BlockPos pos) {
@@ -171,9 +178,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
 
     @Override
     public ItemStack removeStack(int slot) { //CREDIT: Adapted from https://fabricmc.net/wiki/tutorial:inventory
-        logger_block.fatal(stacks);
         ItemStack out = Inventories.removeStack(stacks, slot);
-        logger_block.warn(stacks);
         return out;
     }
 
@@ -200,7 +205,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
         return false;
     }
     
-    public boolean insertItem(ConveyorBasicBlockEntity destination, Direction direction, ItemStack inStack) {
+    public boolean insertItem(SidedInventory destination, Direction direction, ItemStack inStack) {
         for (int slot : destination.getAvailableSlots(direction)) {
             if (destination.canInsert(slot, inStack, direction)) {
                 if (!destination.getStack(slot).isEmpty()) {
@@ -212,6 +217,21 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
                     destination.setStack(slot, inStack);
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+    
+    public boolean insertItem(Inventory destination, ItemStack inStack) {
+        for (int slot = 0; slot < destination.size(); slot++) {
+            if (!destination.getStack(slot).isEmpty()) {
+                if (destination.getStack(slot).isOf(inStack.getItem())) {
+                    destination.setStack(slot, new ItemStack(inStack.getItem(), this.getStack(slot).getCount() + inStack.getCount()));
+                    return true;
+                }
+            } else {
+                destination.setStack(slot, inStack);
+                return true;
             }
         }
         return false;
