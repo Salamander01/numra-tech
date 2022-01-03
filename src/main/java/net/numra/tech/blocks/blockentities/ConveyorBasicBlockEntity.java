@@ -8,6 +8,9 @@ import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.Packet;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -32,6 +35,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     private final DefaultedList<ItemStack> stacks;
 
     public static void tick(World world, BlockPos pos, BlockState state, ConveyorBasicBlockEntity blockEntity) {
+        if (world.isClient) return;
         if (blockEntity.selfState.get(ACTIVE)) {
             if (!blockEntity.blocked) {
                 for (int i = 0; i < blockEntity.progress.length; ++i) {
@@ -250,6 +254,11 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     @Override
     public boolean canExtract(int slot, ItemStack stack, Direction dir) {
         return dir == Direction.DOWN /* Temporary */ || dir == selfState.get(DIRECTION).getSecondDirection();
+    }
+    
+    @Override
+    public Packet<ClientPlayPacketListener> toUpdatePacket() {
+       return BlockEntityUpdateS2CPacket.create(this, BlockEntity::createNbt);
     }
 
     public ConveyorBasicBlockEntity(BlockPos pos, BlockState state) {
