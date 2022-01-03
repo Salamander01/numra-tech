@@ -25,6 +25,7 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import net.numra.tech.blocks.blockentities.ConveyorBasicBlockEntity;
 
 import static net.numra.tech.NumraTech.logger_block;
 
@@ -157,7 +158,7 @@ public class ConveyorBasicBlock extends BlockWithEntity {
 
     @Override
     public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.ENTITYBLOCK_ANIMATED;
+        return BlockRenderType.MODEL;
     }
 
     @Override

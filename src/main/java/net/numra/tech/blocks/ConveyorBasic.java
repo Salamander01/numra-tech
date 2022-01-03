@@ -1,5 +1,6 @@
 package net.numra.tech.blocks;
 
+import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
@@ -8,9 +9,12 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import net.numra.tech.blocks.blockentities.ConveyorBasicBlockEntity;
+import net.numra.tech.blocks.blockentities.ConveyorBasicBlockEntityRenderer;
 import net.numra.tech.items.ItemGroups;
 
 import static net.numra.tech.NumraTech.logger_block;
+import static net.numra.tech.NumraTechClient.logger_client;
 
 public class ConveyorBasic {
     // Defines and registers conveyor_basic blocks and their corresponding items
@@ -22,6 +26,11 @@ public class ConveyorBasic {
     public static void initBlockEntities() {
         logger_block.debug("initializing numra:conveyor_basic_block_entity");
         CONVEYOR_BASIC_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "numra:conveyor_basic_block_entity", FabricBlockEntityTypeBuilder.create(ConveyorBasicBlockEntity::new, CONVEYOR_WOOD).build(null));
+    }
+    
+    public static void initEntityRenderers() {
+        logger_client.debug("initializing ConveyorBasicEntityRenderer");
+        BlockEntityRendererRegistry.register(CONVEYOR_BASIC_BLOCK_ENTITY, ConveyorBasicBlockEntityRenderer::new);
     }
 
     public static void initBlocks() {

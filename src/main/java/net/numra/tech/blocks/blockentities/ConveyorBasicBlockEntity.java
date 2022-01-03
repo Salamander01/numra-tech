@@ -1,9 +1,6 @@
-package net.numra.tech.blocks;
+package net.numra.tech.blocks.blockentities;
 
-import net.minecraft.block.AirBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.FluidBlock;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -16,6 +13,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.PositionImpl;
 import net.minecraft.world.World;
+import net.numra.tech.blocks.ConveyorBasic;
+import net.numra.tech.blocks.ConveyorBasicBlock;
 import org.jetbrains.annotations.Nullable;
 
 import static net.numra.tech.NumraTech.logger_block;
@@ -85,7 +84,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
             blocked = true;
             markDirty();
             return "Blocked";
-        } else if (outBlock instanceof AirBlock || outBlock instanceof FluidBlock) {
+        } else if (outBlock instanceof AirBlock || outBlock instanceof FluidBlock || outBlock instanceof BubbleColumnBlock) {
             ItemEntity itemEntity = new ItemEntity(world, dropPos.getX(), dropPos.getY(), dropPos.getZ(), stacks.get(itemIndex), 0, 0, 0);
             itemEntity.setPickupDelay(15);
             world.spawnEntity(itemEntity);
@@ -101,7 +100,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     private void checkIfBlocked(World world, BlockPos pos) {
         BlockPos outPos = getOutPos(pos);
         Block outBlock = world.getBlockState(outPos).getBlock();
-        if (outBlock instanceof AirBlock || outBlock instanceof FluidBlock || (outBlock instanceof ConveyorBasicBlock && ((ConveyorBasicBlock)selfState.getBlock()).testConveyorConnect(selfState, selfState.get(DIRECTION).getSecondDirection(), world.getBlockState(outPos)))) {
+        if (outBlock instanceof AirBlock || outBlock instanceof FluidBlock || outBlock instanceof BubbleColumnBlock || (outBlock instanceof ConveyorBasicBlock && ((ConveyorBasicBlock)selfState.getBlock()).testConveyorConnect(selfState, selfState.get(DIRECTION).getSecondDirection(), world.getBlockState(outPos)))) {
             blocked = false;
             markDirty();
         }
@@ -152,6 +151,10 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
             return this.stacks.get(slot);
         } else return ItemStack.EMPTY;
     }
+    
+    public DefaultedList<ItemStack> getStacks() {
+        return this.stacks;
+    }
 
     @Override
     public ItemStack removeStack(int slot, int count) { //CREDIT: Adapted from https://fabricmc.net/wiki/tutorial:inventory
@@ -164,7 +167,10 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
 
     @Override
     public ItemStack removeStack(int slot) { //CREDIT: Adapted from https://fabricmc.net/wiki/tutorial:inventory
-        return Inventories.removeStack(stacks, slot);
+        logger_block.fatal(stacks);
+        ItemStack out = Inventories.removeStack(stacks, slot);
+        logger_block.warn(stacks);
+        return out;
     }
 
     @Override
