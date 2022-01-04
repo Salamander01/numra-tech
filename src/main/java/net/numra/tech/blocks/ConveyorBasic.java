@@ -19,7 +19,7 @@ import static net.numra.tech.NumraTechClient.logger_client;
 public class ConveyorBasic {
     // Defines and registers conveyor_basic blocks and their corresponding items
 
-    public static final ConveyorBasicBlock CONVEYOR_WOOD = new ConveyorBasicBlock(FabricBlockSettings.of(Material.WOOD).hardness(2.5f).resistance(3.0f), 0.0165, 0.0135, 1, 16, 5);
+    public static final ConveyorBasicBlock CONVEYOR_WOOD = new ConveyorBasicBlock(FabricBlockSettings.of(Material.WOOD).hardness(2.5f).resistance(3.0f), 0.0165F, 0.0135F, 1, 16, 5);
 
     public static BlockEntityType<ConveyorBasicBlockEntity> CONVEYOR_BASIC_BLOCK_ENTITY;
 

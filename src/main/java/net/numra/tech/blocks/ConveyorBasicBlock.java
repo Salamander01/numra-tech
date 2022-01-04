@@ -31,8 +31,8 @@ import static net.numra.tech.NumraTech.logger_block;
 
 @SuppressWarnings("deprecation") // As fabric uses deprecation to indicate you should override and not call in the context of "Block" and those warnings get annoying
 public class ConveyorBasicBlock extends BlockWithEntity {
-    private final double fullVelocity;
-    private final double partVelocity;
+    private final float fullVelocity;
+    private final float partVelocity;
     private final int inventorySize;
     private final int slotSize;
     private final int transferSpeed;
@@ -185,7 +185,7 @@ public class ConveyorBasicBlock extends BlockWithEntity {
         return checkType(type, ConveyorBasic.CONVEYOR_BASIC_BLOCK_ENTITY, ConveyorBasicBlockEntity::tick);
     }
 
-    public ConveyorBasicBlock(Settings settings, double fullVelocity, double partVelocity, int inventorySize, int slotSize, int transferSpeed) {
+    public ConveyorBasicBlock(Settings settings, float fullVelocity, float partVelocity, int inventorySize, int slotSize, int transferSpeed) {
         super(settings);
         setDefaultState(getStateManager().getDefaultState().with(ACTIVE, false).with(DIRECTION, ConveyorDirection.NORTH));
         this.fullVelocity = fullVelocity;
