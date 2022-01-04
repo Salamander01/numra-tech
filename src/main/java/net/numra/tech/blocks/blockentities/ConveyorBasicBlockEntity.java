@@ -12,6 +12,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -125,13 +126,13 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
             return "Blocked";
         }
     }
-    
+
     private boolean checkIfBlocked(World world, BlockPos pos) {
         BlockPos outPos = pos.offset(selfState.get(DIRECTION).getSecondDirection());
         Block outBlock = world.getBlockState(outPos).getBlock();
         return !(outBlock instanceof AirBlock) && !(outBlock instanceof FluidBlock) && !(outBlock instanceof BubbleColumnBlock) && (!(outBlock instanceof ConveyorBasicBlock) || !((ConveyorBasicBlock) selfState.getBlock()).testConveyorConnect(selfState, selfState.get(DIRECTION).getSecondDirection(), world.getBlockState(outPos)));
     }
-    
+
     private PositionImpl getDropPos(BlockPos pos) {
         BlockPos tempPos;
         switch (selfState.get(DIRECTION).getSecondDirection()) {
@@ -145,11 +146,11 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     public void updateSelfState(BlockState state) {
         selfState = state;
     }
-    
+
     public BlockState getSelfState() {
         return this.selfState;
     }
-    
+
     public int getProgress(int index) {
         return this.progress[index];
     }
@@ -175,7 +176,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
             return this.stacks.get(slot);
         } else return ItemStack.EMPTY;
     }
-    
+
     public DefaultedList<ItemStack> getStacks() {
         return this.stacks;
     }
@@ -216,7 +217,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     public boolean canPlayerUse(PlayerEntity player) {
         return false;
     }
-    
+
     public boolean insertItem(SidedInventory destination, Direction direction, ItemStack inStack) {
         for (int slot : destination.getAvailableSlots(direction)) {
             if (destination.canInsert(slot, inStack, direction)) {
@@ -233,7 +234,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
         }
         return false;
     }
-    
+
     public boolean insertItem(Inventory destination, ItemStack inStack) {
         for (int slot = 0; slot < destination.size(); slot++) {
             if (!destination.getStack(slot).isEmpty()) {
@@ -288,10 +289,6 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
         return dir == Direction.DOWN /* Temporary */ || dir == selfState.get(DIRECTION).getSecondDirection();
     }
     
-    @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-       return BlockEntityUpdateS2CPacket.create(this, BlockEntity::createNbt);
-    }
 
     public ConveyorBasicBlockEntity(BlockPos pos, BlockState state) {
         super(ConveyorBasic.CONVEYOR_BASIC_BLOCK_ENTITY, pos, state);
@@ -302,5 +299,20 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
         this.transferSpeed = ((ConveyorBasicBlock)state.getBlock()).getTransferSpeed();
         this.progress = new int[inventorySize];
         this.blocked = false;
+    }
+    
+    @Override
+    public Packet<ClientPlayPacketListener> toUpdatePacket() {
+        return BlockEntityUpdateS2CPacket.create(this);
+    }
+
+    @Override
+    public void markDirty()  {
+        ((ServerWorld) world).getChunkManager().markForUpdate(pos);
+    }
+
+    @Override
+    public NbtCompound toInitialChunkDataNbt() {
+        return createNbtWithIdentifyingData();
     }
 }
