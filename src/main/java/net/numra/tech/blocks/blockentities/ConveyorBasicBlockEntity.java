@@ -263,6 +263,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
 
     @Override
     public void readNbt(NbtCompound tag) {
+        stacks.clear();
         Inventories.readNbt(tag, stacks);
         progress = tag.getIntArray("progress");
         blocked = tag.getBoolean("blocked");
