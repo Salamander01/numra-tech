@@ -164,11 +164,8 @@ public class ConveyorBasicBlock extends BlockWithEntity {
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (state.getBlock() instanceof ConveyorBasicBlock && newState.getBlock() instanceof ConveyorBasicBlock) {
-            if (state.get(DIRECTION) != newState.get(DIRECTION) || state.get(ACTIVE) != newState.get(ACTIVE)) {
-                if (world.getBlockEntity(pos) != null) {
-                    ((ConveyorBasicBlockEntity) world.getBlockEntity(pos)).updateSelfState(newState);
-                } else logger_block.error("Null BlockEntity found during ConveyorBasicBlock.onStateReplaced");
-            }
+            // Might need to do stuff here later.
+            return;
         } else {
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if (blockEntity instanceof Inventory) {
