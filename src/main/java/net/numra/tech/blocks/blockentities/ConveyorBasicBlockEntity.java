@@ -129,7 +129,7 @@ public class ConveyorBasicBlockEntity extends BlockEntity implements SidedInvent
     private boolean checkIfBlocked(World world, BlockPos pos) {
         BlockPos outPos = pos.offset(getCachedState().get(DIRECTION).getSecondDirection());
         Block outBlock = world.getBlockState(outPos).getBlock();
-        return !(outBlock instanceof AirBlock) && !(outBlock instanceof FluidBlock) && !(outBlock instanceof BubbleColumnBlock) && (!(outBlock instanceof ConveyorBasicBlock) || !((ConveyorBasicBlock) getCachedState().getBlock()).testConveyorConnect(getCachedState(), getCachedState().get(DIRECTION).getSecondDirection(), world.getBlockState(outPos)));
+        return !(outBlock instanceof AirBlock || outBlock instanceof FluidBlock || outBlock instanceof BubbleColumnBlock || (world.getBlockEntity(outPos) instanceof Inventory && !(outBlock instanceof ConveyorBasicBlock)) || outBlock instanceof ConveyorBasicBlock && !((ConveyorBasicBlock) getCachedState().getBlock()).testConveyorConnect(getCachedState(), getCachedState().get(DIRECTION).getSecondDirection(), world.getBlockState(outPos)));
     }
 
     private PositionImpl getDropPos(BlockPos pos) {
