@@ -41,7 +41,7 @@ public class ConveyorBasicBlockEntityRenderer implements BlockEntityRenderer<Con
                 case NORTH, WEST -> 45;
                 default -> -45;
             };
-            if(rotation == Math.abs(rotation)) return Vec3f.POSITIVE_Y.getDegreesQuaternion(rotation); else return Vec3f.NEGATIVE_Y.getDegreesQuaternion(rotation);
+            if(rotation == Math.abs(rotation)) return Vec3f.POSITIVE_Y.getDegreesQuaternion(rotation); else return Vec3f.NEGATIVE_Y.getDegreesQuaternion(-rotation);
         } else {
             return getDirectionQuaternion(directions.getSecondDirection());
         }
