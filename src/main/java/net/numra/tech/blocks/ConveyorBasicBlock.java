@@ -62,10 +62,9 @@ public class ConveyorBasicBlock extends BlockWithEntity {
         };
     }
 
-    @Override
+    @Override // TODO
     public BlockState getPlacementState(ItemPlacementContext ctx) {
         return switch (ctx.getPlayerFacing().asString()) {
-            case "north" -> this.getDefaultState().with(DIRECTION, ConveyorDirection.NORTH);
             case "east" -> this.getDefaultState().with(DIRECTION, ConveyorDirection.EAST);
             case "south" -> this.getDefaultState().with(DIRECTION, ConveyorDirection.SOUTH);
             case "west" -> this.getDefaultState().with(DIRECTION, ConveyorDirection.WEST);
@@ -83,14 +82,26 @@ public class ConveyorBasicBlock extends BlockWithEntity {
         return false;
     }
 
-    @Override
+    @Override // TODO
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
+        BlockState out = state;
         if (neighborState.getBlock() instanceof ConveyorBasicBlock) {
+            // Turning logic - Will change
+            out = turnHandler(state, neighborState, direction, out);
             if (testConveyorConnect(state, direction, neighborState)) {
-                return state.with(ACTIVE, neighborState.get(ACTIVE));
+                out = out.with(ACTIVE, neighborState.get(ACTIVE));
             }
         }
-        return state;
+        return out;
+    }
+
+    public BlockState turnHandler(BlockState state, BlockState neighborState, Direction direction, BlockState out) {
+        if (direction == neighborState.get(DIRECTION).getFirstDirection() && state.get(DIRECTION).getFirstDirection() != neighborState.get(DIRECTION).getFirstDirection().getOpposite()) {
+            out = out.with(DIRECTION, ConveyorDirection.newConveyorDirection(state.get(DIRECTION).getFirstDirection(), neighborState.get(DIRECTION).getFirstDirection()));
+        } else if (direction == neighborState.get(DIRECTION).getSecondDirection().getOpposite() && state.get(DIRECTION).getSecondDirection() != neighborState.get(DIRECTION).getSecondDirection().getOpposite()){
+            out = out.with(DIRECTION, ConveyorDirection.newConveyorDirection(neighborState.get(DIRECTION).getSecondDirection(), state.get(DIRECTION).getSecondDirection()));
+        }
+        return out;
     }
 
     @Override
